@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block body %}
+
+        <!-- Page Header-->
+        <header class="masthead" style="background-image: url( {{url_for('static' , filename = 'assets/img/home-bg.jpg') }} )">
+            <div class="container position-relative px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-md-10 col-lg-8 col-xl-7">
+                        <div class="site-heading">
+                            <h1>Welcome to the Admin Panel!</h1>
+                            <span class="subheading">Manage your post and save them.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Main Content-->
+        <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+                <div class="col-md-10 col-lg-8 col-xl-7">
+                    <!-- Post preview-->
+<!-- <h1>Welcome you are logged in!</h1> -->
+                  <h1>Add A new post</h1>
+                  <a class="btn btn-lg btn-primary text-uppercase" href="/edit/0">Create Post</a>
+                  <hr>
+                  <h1>Upload A file</h1> 
+                  <form action="/uploader" method="post" enctype="multipart/form-data">
+                    <input type="file" name="file1">
+                    <button class="btn btn-sm btn-primary text-uppercase" href="" type="submit">Submit</button>
+
+                  </form>  
+      <hr>           
+                  <br>
+      <h1>Edit Posts</h1>
+<table class="table">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Title</th>
+        <th>slug</th>
+        <th>date</th>
+        <th>Edit</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+        {%for post in posts %}
+      <tr>
+          
+        <td>{{post.id}}</td>
+        <td>{{post.title}}</td>
+        <td>{{post.slug}}</td>
+        <td>{{post.date}}</td>
+        <td> <a href="/edit/{{post.id}}" class="btn btn-sm btn-primary text-uppercase" href="#!">Edit</a></td>
+        <td> <a class="btn btn-sm btn-primary text-uppercase" href="/delete/{{post.id}}">Delete</a></td>
+        
+      </tr>
+      {% endfor%}
+    </tbody>
+  </table>
+                    
+              </div>
+            </div>
+        </div>
+       
+        {% endblock %}
