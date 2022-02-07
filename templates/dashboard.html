@@ -7,7 +7,7 @@
                 <div class="row gx-4 gx-lg-5 justify-content-center">
                     <div class="col-md-10 col-lg-8 col-xl-7">
                         <div class="site-heading">
-                            <h1>Welcome to the Admin Panel!</h1>
+                            <h1>Welcome to the Admin Panel! {{user.username}}</h1>
                             <span class="subheading">Manage your post and save them.</span>
                         </div>
                     </div>
@@ -21,7 +21,7 @@
                     <!-- Post preview-->
 <!-- <h1>Welcome you are logged in!</h1> -->
                   <h1>Add A new post</h1>
-                  <a class="btn btn-lg btn-primary text-uppercase" href="/edit/0">Create Post</a>
+                  <a class="btn btn-lg btn-primary text-uppercase" href="/edit/{{user.username}}/0">Create Post</a>
                   <hr>
                   <h1>Upload A file</h1> 
                   <form action="/uploader" method="post" enctype="multipart/form-data">
@@ -29,6 +29,7 @@
                     <button class="btn btn-sm btn-primary text-uppercase" href="" type="submit">Submit</button>
 
                   </form>  
+                  
       <hr>           
                   <br>
       <h1>Edit Posts</h1>
@@ -51,8 +52,8 @@
         <td>{{post.title}}</td>
         <td>{{post.slug}}</td>
         <td>{{post.date}}</td>
-        <td> <a href="/edit/{{post.id}}" class="btn btn-sm btn-primary text-uppercase" href="#!">Edit</a></td>
-        <td> <a class="btn btn-sm btn-primary text-uppercase" href="/delete/{{post.id}}">Delete</a></td>
+        <td> <a href="/edit/{{user.username}}/{{post.id}}" class="btn btn-sm btn-primary text-uppercase">Edit</a></td>
+        <td> <a class="btn btn-sm btn-primary text-uppercase" href="/delete/{{user.username}}/{{post.id}}">Delete</a></td>
         
       </tr>
       {% endfor%}

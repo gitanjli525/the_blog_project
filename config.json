@@ -2,9 +2,9 @@
     "params":
     {
         
-        "local_server":"True",
+        "local_server":"False",
         "local_uri":"mysql://root:@localhost/tracebacks",
-        "prod_uri" :"mysql://root:@localhost/tracebacks",
+        "prod_uri" :"mysql://example_user:password@67.205.144.13/tracebacks",
         "fb_url":"myfb.com",
         "tw_url":"mytw.com",
         "gh_url":"https://github.com/abhishekkumar1775",

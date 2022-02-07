@@ -21,32 +21,26 @@
   <body class="text-center">
     
 <main class="form-signin">
-  <form action="/dashboard" method="post">
+  <form action="/signup" method="post">
       {% set fname = 'assets/img/' + params['login_image'] %} 
     <img class="mb-4" src="{{url_for('static',filename= fname )}}" alt="" width="72" height="57">
     <h4 class="h3 mb-3 fw-normal text-danger">{{cred}}</h4>
-    <h1 class="h3 mb-3 fw-normal">Login</h1>
+    <h1 class="h3 mb-3 fw-normal">Sign UPP!</h1>
 
     <div class="form-floating">
-      <input type="text" name="uname" class="form-control" id="floatingInput" placeholder="name@example.com">
-      <label for="floatingInput">Email address</label>
+      <input type="text" name="uname" class="form-control" id="floatingInput" placeholder="Username">
+      <label for="floatingInput">User Name</label>
     </div>
     <div class="form-floating">
-      <input type="password" name="pass" class="form-control" id="floatingPassword" placeholder="Password">
-      <label for="floatingPassword">Password</label>
+      <input type="email" name="email" class="form-control" id="floatingPassword" placeholder="Password">
+      <label for="floatingPassword">Email</label>
     </div>
 
     <div class="checkbox mb-3">
-      <label>
-        <input type="checkbox" value="remember-me"> Remember me
-      </label>
       <br>
       <br>
-      <p  class="text-right">
-        <a class="d-flex-end" href="/forgot">Forgot Password</a> 
-      </p>
     </div>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">Sign Up</button>
     <p class="mt-5 mb-3 text-muted">&copy; {{params['blog_name']}}</p>
   </form>
 </main>
