@@ -8,7 +8,7 @@
                     <div class="col-md-10 col-lg-8 col-xl-7">
                         <div class="site-heading">
                             <h1>code-blogs</h1>
-                            <span class="subheading">{{params['tag_line']}}</span>
+                            <span class="subheading">{{params['post.tag_line']}}</span>
                         </div>
                     </div>
                 </div>
@@ -20,23 +20,47 @@
                 <div class="col-md-10 col-lg-8 col-xl-7">
                     <!-- Post preview-->
 
+                    
                     {% for post in posts %}
-                    <div class="post-preview">
+                    <div class="alert alert-dark" role="alert">
+                        <h4 class="alert-heading">
+                            <a href="/post/{{post.slug}}">
+                                <h1 class="post-title">{{post.title}}</h2>
+                                <!-- <h3 class="post-subtitle">{{post.tagline}}</h3> -->
+                            </a>
+                        </h4>
+                        <div class="post-preview">
+                         
+                            <h5 class="alert-heading">
+                                <a href="#">
+                                    <div class="d-flex flex-row align-items-center">
+                                        <img
+                                          src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(32).webp"
+                                          alt="avatar"
+                                          width="25"
+                                          height="25"
+                                        />
+                                        <div class="small mb-0 ms-2">
+                                            <b >{{post.username}}</b> 
+                                        </div>
+                                    </div>
+
+                                    
+                                </a>
+                            </h5>
+                            on {{post.date}}
+    
+                        </div>
+                        <hr>
                         <a href="/post/{{post.slug}}">
-                            <h2 class="post-title">{{post.title}}</h2>
                             <h3 class="post-subtitle">{{post.tagline}}</h3>
                         </a>
-                        <p class="post-meta">
-                            Posted by
-                            <a href="#!">Posted On</a>
-                            on {{post.date}} <br>
-                            {{post.content[0:40]}}.....
-                        </p>
+                        <p>{{post.content[0:80]}}. . . . .</p>
                         
-                           
-                        
+                         
                         
                     </div>
+
 
                     
                     {% endfor %}

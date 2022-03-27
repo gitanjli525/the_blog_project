@@ -1,23 +1,16 @@
+
 from flask import Flask, render_template, request ,session,redirect
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine, MetaData, Table
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy import Table, Column, Integer, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql import select, join, func
-from pprint import pprint
 from werkzeug.utils import secure_filename
 import json
 import os
 from datetime import datetime
 from flask_mail import Mail
-import sys, math,random
 
-local_server = True
+# local_server = True
 with open('config.json','r') as c:
     params = json.load(c)["params"]
 params["log"]=0
-forgot = {}
 
 app = Flask(__name__)
 app.secret_key = 'super-secret-key'
@@ -31,15 +24,13 @@ app.config.update(
 )
 
 mail = Mail(app)
-db = SQLAlchemy(app)
-if(True):
+
+if(params["local_server"]):
     app.config['SQLALCHEMY_DATABASE_URI'] = params["local_uri"]
 else:
-    app.config['SQLALCHEMY_DATABASE_URI'] ='mysql+mysqlconnector://{user}:{password}@{server}/{database}'.format(user='example_user', password='password', server='67.205.144.13', database='tracebacks')
-
-# app.config['SQLALCHEMY_DATABASE_URI'] ='mysql://{user}:{password}@{server}/{database}'.format(user='example_user', password='password', server='67.205.144.13/phpmyadmin', database='tracebacks')
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://example_user:password@67.205.144.13/tracebacks' 
-
+    app.config['SQLALCHEMY_DATABASE_URI'] = params["prod_uri"]
+    
+db = SQLAlchemy(app)
 
 class Contact (db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -57,27 +48,16 @@ class Posts (db.Model):
     content = db.Column(db.String(200), unique=True, nullable=False)
     date = db.Column(db.String(20), unique=False, nullable=True)
     img_file = db.Column(db.String(20), unique=False, nullable=True)
-    user_id = db.Column(db.String(20), ForeignKey('Users.id'), unique=False, nullable=True)
-
-class Users (db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), nullable=False)
-    pswd = db.Column(db.String(20), nullable=False)
-    email = db.Column(db.String(30), nullable=False)
-    
 
 
 
 @app.route("/<string:token>")
 def home(token):
+    print("Entered home")
     start_token = int(token)
-    if ('user' in session ): 
+    if ('user' in session and session['user'] == params['admin']): 
         params['log']=1
-
-    post = Posts.query\
-    .join(Users, Users.id==Posts.user_id)\
-    .add_columns(Users.id, Users.username, Users.email, Posts.content,Posts.title,Posts.slug,Posts.tagline,Posts.img_file,Posts.date).all()
-
+    post = Posts.query.filter_by().all()
     params['total_post'] = len(post)
     post = post[start_token:start_token+params['no_of_posts']]
     return render_template("index.html",params =params,posts = post,start_token=start_token)
@@ -86,18 +66,13 @@ def home(token):
 def home_def():
     print("Entered home")
 
-    params['log']=0
-    if ('user' in session): 
+    if ('user' in session and session['user'] == params['admin']): 
         params['log']=1
-        
     start_token =0
-    post = Posts.query\
-    .join(Users, Users.id==Posts.user_id)\
-    .add_columns(Users.id, Users.username, Users.email, Posts.content,Posts.title,Posts.slug,Posts.tagline,Posts.img_file,Posts.date).all()
-
+    post = Posts.query.filter_by().all()
     params['total_post'] = len(post)
     post = post[start_token:start_token+params['no_of_posts']]
-    return render_template("index.html",params =params,posts = post,start_token=start_token)
+    return render_template("index.html",params =params,posts = post,start_token=0)
 
 @app.route("/about")
 def about():
@@ -106,35 +81,22 @@ def about():
 
 @app.route("/dashboard",methods = ['GET','POST'])
 def dashboard():
-    
     cred = ""
-    # if (user_id in session and session[user_id] == user_id): 
-    #     params['log']=1
 
-    
-    if ('user' in session ):
-        params['log'] = 1
-        all_user = Users.query.filter_by(username = session['user'])
-        post = Posts.query.filter_by(user_id = all_user[0].id)
-        return render_template("dashboard.html",params = params,posts = post,user = all_user[0])
+    if ('user' in session and session['user'] == params['admin']): 
+        params['log']=1
+    post = Posts.query.all()
+    if ('user' in session and session['user'] == params['admin']):
+        return render_template("dashboard.html",params = params,posts = post)
 
     if request.method == 'POST':
         username = request.form.get('uname')
         userpass = request.form.get('pass')
-
-        all_user = Users.query.filter_by(username = username).first()
-        print('This is standard output',all_user, file=sys.stdout)
-
-        if( all_user == None):
-            return render_template("login.html",params = params,cred = "User Doesn't Exists !!!!")
-
-        
-        if(username == all_user.username and userpass == all_user.pswd ):
+        if(username == params['admin'] and userpass == params['admin_password']):
             #set the session variable
             session['user'] = username
             params["log"] =1
-            post = Posts.query.filter_by(user_id = all_user.id)
-            return render_template("dashboard.html",params= params,posts = post,user = all_user)
+            return render_template("dashboard.html",params= params,posts = post)
         else :
             return render_template("login.html",params = params,cred = "Wrong credentials !!!!")
         
@@ -147,9 +109,9 @@ def post_route(post_slug):
     post = Posts.query.filter_by(slug = post_slug).first()
     return render_template("post.html",post = post,params = params)
 
-@app.route("/edit/<string:username>/<string:id>",methods = ['GET','POST'])
-def edit(username,id):
-    if ("user" in session and session['user'] == username): 
+@app.route("/edit/<string:id>",methods = ['GET','POST'])
+def edit(id):
+    if ('user' in session and session['user'] == params['admin']): 
         params['log']=1
         if request.method == 'POST':
             box_title = request.form.get('title')
@@ -159,8 +121,7 @@ def edit(username,id):
             img_file = request.form.get('img_file')
             
             if id == '0':
-                user_id  = Users.query.filter_by(username = username).first().id
-                post = Posts(title = box_title,user_id = user_id ,slug = slug,date = datetime.now(),content= content,tagline= tline,img_file = img_file)
+                post = Posts(title = box_title,slug = slug,date = datetime.now(),content= content,tagline= tline,img_file = img_file)
                 db.session.add(post)
                 db.session.commit()
                 return redirect("/post/"+post.slug)
@@ -181,14 +142,12 @@ def edit(username,id):
                 session['user'] = None
                 params["log"]=0                                                                          
                 return redirect("/post/"+post.slug)
-        user_id  = Users.query.filter_by(username = username).first().id
-        post = Posts.query.filter_by(id = id,user_id=user_id).first()
-        return render_template("edit.html",params = params,post = post,username=username,  id=id)
+
+        post = Posts.query.filter_by(id =id).first()
+        return render_template("edit.html",params = params,post = post,id=id)
 
     else:
         return redirect("/dashboard")
-
-
 
 @app.route("/contact", methods= ['GET','POST'])
 def contact():
@@ -206,7 +165,7 @@ def contact():
         db.session.commit()
         mail.send_message("New message from " + name, 
                 sender = email, 
-                recipients = [params['gmail-user'],"abhishekkumar260ak@gmail.com"],
+                recipients = [params['gmail-user']],
                 body = message + '\n' + phone
                  )
 
@@ -226,7 +185,6 @@ def delete(id):
         Posts.query.filter_by(id = id).delete()
         db.session.commit()
         redirect('/')
-        
     return redirect('/dashboard')
 
 @app.route("/uploader", methods= ['GET','POST'])
@@ -248,60 +206,5 @@ def uploader():
 # def wrong_page(wrong_page):
 #     return render_template("index.html",params =params)
 
-@app.route("/forgot", methods= ['GET','POST'])
-def forgot_password():
-    # print("Contact API is called")
-    if request.method == 'POST':
-        otp = generateOTP()
-        email = request.form.get('uname')
-        user = Users.query.filter_by(username = email).first()
-        if(user == None):
-            return render_template("reset.html",params =params,cred = "User Not Found!!")
-        user.pswd = otp
-        db.session.commit()
-        cred = "Check Your mail and Enter your new Password"
-        mail.send_message("New message from " + "Admin", 
-                sender = 'admin@blogpost.com', 
-                recipients = [user.email],
-                body = "Your new password is : "+ otp +". Contact Admin if you haven't initiated this"
-                 )
-        return render_template("login.html",params =params,cred=cred)         
-    
-    return render_template("reset.html",params =params)
 
-@app.route("/signup", methods= ['GET','POST'])
-def signup():
-    # print("Contact API is called")
-    if request.method == 'POST':
-        otp = generateOTP()
-        uname = request.form.get('uname')
-        email = request.form.get('email')
-        user = Users.query.filter_by(username = uname).first()
-        if(user):
-            return render_template("signup.html",params =params,cred = "User_name not available!")
-
-        new_user = Users(username = uname,email =email,pswd = otp)
-        db.session.add(new_user)
-        db.session.commit()
-
-        cred = "Check Your mail and Enter your new Password"
-        mail.send_message("Welcome to Blog Commmunity " + uname, 
-                sender = 'admin@blogpost.com', 
-                recipients = [email],
-                body = "Your new password is : "+ otp +". Contact Admin if you haven't initiated this"
-                 )
-        return render_template("login.html",params =params,cred="Use credentials sent on mail.")         
-    
-    return render_template("signup.html",params =params)
-
-def generateOTP() :
-
-    digits = "0123456789"
-    OTP = ""
-
-    for i in range(6) :
-        OTP += digits[math.floor(random.random() * 10)]
- 
-    return OTP
-    
 app.run(debug = True)

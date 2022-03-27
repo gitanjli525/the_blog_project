@@ -15,12 +15,10 @@ def test_add_user():
 
     x = requests.post(url = url + 'signup', data = myobj)
 
-def test_send_feedback(name,email,phone,message):
-    myobj = {'name' : name,'email':email,'phone':phone,'message'
-    :message}
+def test_send_feedback():
+    myobj = {'uname' : "gitanjli",'email':"abhishekkumar260.ak@gmail.com"}
 
-    x = requests.post(url = url + 'contact', data = myobj)
+    x = requests.post(url = url + 'signup', data = myobj)
 
 # test_add_post()
-# test_add_user()
-test_send_feedback('HAPPY','SOME@MAIL.COM','9354954597','MY MESSAGE')
+test_add_user()
