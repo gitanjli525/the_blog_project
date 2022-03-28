@@ -12,7 +12,7 @@
                             <h2 class="subheading">{{post.tagline}}</h2>
                             <span class="meta">
                                 Posted by
-                                <a href="#!">Admin</a>
+                                <a href="/about/{{post.username}}"> <b>{{post.username}}</b> </a>
                                 on {{post.date}}
                             </span>
                         </div>
@@ -31,4 +31,64 @@
                 </div>
             </div>
         </article>
+
+        <div class="container mt-5 mb-5">
+            <div class="d-flex justify-content-center row">
+                <div class="d-flex flex-column col-md-8">
+                   
+                    <div class="d-flex flex-row align-items-center text-left comment-top p-2 bg-white border-bottom px-4">
+                        <!-- <div class="profile-image"><img class="rounded-circle" src="https://i.imgur.com/t9toMAQ.jpg" width="70"></div> -->
+                        <!-- <div class="d-flex flex-column-reverse flex-grow-0 align-items-center votings ml-1"><i class="fa fa-sort-up fa-2x hit-voting"></i><span>127</span><i class="fa fa-sort-down fa-2x hit-voting"></i></div> -->
+                        <div class="d-flex flex-column ml-3">
+                            <div class="d-flex flex-row post-title">
+                                <h5>Penny for you thoughts?</h5><span class="ml-2"></span>
+                            </div>
+                            <!-- <div class="d-flex flex-row align-items-center align-content-center post-title"><span class="bdge mr-1">video</span><span class="mr-2 comments">13 comments&nbsp;</span><span class="mr-2 dot"></span><span>6 hours ago</span></div> -->
+                        </div>
+                    </div>
+
+                    
+                   
+                    <div class="coment-bottom bg-white p-2 px-4">
+                        
+                        {%if params["log"] == 1%}
+                        {% set fname = 'assets/img/' + params['user'] +'.jpg' %}
+                        <form id="commentbox" method="post" action="/comment/{{params['user']}}/{{post.id}}" data-sb-form-api-token="API_TOKEN">
+                            <div class="d-flex flex-row add-comment-section mt-4 mb-4">
+                                <img class="img-fluid img-responsive rounded-circle mr-4" src="{{url_for('static',filename = fname )}}"" width="38">
+                                <input type="text" name="content" class="pl-2 form-control mr-3" placeholder="Add comment">
+                                <button class="btn btn-primary" type="submit">Comment</button>
+                            </div>
+                        </form>
+                        
+                        {% endif%}
+
+                        {% for comment in comments %}
+                        {% set fname = 'assets/img/' + comment.username +'.jpg' %}
+                        <div class="commented-section mt-2">
+                            <div class="d-flex flex-row align-items-center justify-content-start commented-user">
+                                <div class="d-flex flex-row align-items-center">
+                                    <img class="img-fluid img-responsive rounded-circle mr-4" src="{{url_for('static',filename = fname )}}"" width="38">
+                                    <h5 class="mr-2">  {{comment.username}}  </h5><span class="dot mb-1"></span>
+                                </div>
+                                
+                                <span class="mb-1 ml-2">  {{comment.date}}</span>
+                            </div>
+                            <div class="comment-text-sm"><span>{{comment.content}}</span></div>
+                        
+                            <hr>
+                            <!-- <div class="reply-section">
+                                <div class="d-flex flex-row align-items-center voting-icons"><i class="fa fa-sort-up fa-2x mt-3 hit-voting"></i><i class="fa fa-sort-down fa-2x mb-3 hit-voting"></i><span class="ml-2">10</span><span class="dot ml-2"></span>
+                                    <h6 class="ml-2 mt-1">Reply</h6>
+                                </div>
+                            </div> -->
+                        </div>
+                        {% endfor %}
+                        
+                        
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endblock %}
