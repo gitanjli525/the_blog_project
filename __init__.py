@@ -1,8 +1,7 @@
 from flask import Flask, render_template, request ,session,redirect
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy import create_engine,Table, Column, Integer, ForeignKey,desc
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import select, join, func
 from pprint import pprint
@@ -57,16 +56,15 @@ class Posts (db.Model):
     content = db.Column(db.String(200), unique=True, nullable=False)
     date = db.Column(db.String(20), unique=False, nullable=True)
     img_file = db.Column(db.String(20), unique=False, nullable=True)
-    user_id = db.Column(db.String(20), ForeignKey('Users.id'), unique=False, nullable=True)
+    user_id = db.Column(db.String(20), ForeignKey('users.id'), unique=False, nullable=True)
 
 class Users (db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), nullable=False)
+    Name = db.Column(db.String(20), nullable=False)
     pswd = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(30), nullable=False)
-    
-
-
+    about = db.Column(db.String(200), unique=True, nullable=False)
 
 @app.route("/<string:token>")
 def home(token):
@@ -76,7 +74,7 @@ def home(token):
 
     post = Posts.query\
     .join(Users, Users.id==Posts.user_id)\
-    .add_columns(Users.id, Users.username, Users.email, Posts.content,Posts.title,Posts.slug,Posts.tagline,Posts.img_file,Posts.date).all()
+    .add_columns(Users.id, Users.username, Users.email, Posts.content,Posts.title,Posts.slug,Posts.tagline,Posts.img_file,Posts.date).order_by(desc(Posts.date)).all()
 
     params['total_post'] = len(post)
     post = post[start_token:start_token+params['no_of_posts']]
@@ -93,7 +91,7 @@ def home_def():
     start_token =0
     post = Posts.query\
     .join(Users, Users.id==Posts.user_id)\
-    .add_columns(Users.id, Users.username, Users.email, Posts.content,Posts.title,Posts.slug,Posts.tagline,Posts.img_file,Posts.date).all()
+    .add_columns(Users.id, Users.username, Users.email, Posts.content,Posts.title,Posts.slug,Posts.tagline,Posts.img_file,Posts.date).order_by(desc(Posts.date)).all()
 
     params['total_post'] = len(post)
     post = post[start_token:start_token+params['no_of_posts']]
@@ -101,8 +99,29 @@ def home_def():
 
 @app.route("/about")
 def about():
-    name = "happpy"
-    return render_template("about.html",params =params)
+    
+    if('user' not in session or session['user'] == None):
+        return redirect("/dashboard")
+
+    username = session['user']
+    user = Users.query.filter_by(username = username).first()
+    if(user == None):
+        return redirect('/logout')
+    post = Posts.query.join(Users, Users.id==Posts.user_id).add_columns(Users.id, Users.username, Users.email, Posts.content,Posts.title,Posts.slug,Posts.tagline,Posts.img_file,Posts.date).filter(Posts.user_id == user.id).all()
+
+    return render_template("about.html",params =params,user = user,posts=post)
+
+@app.route("/about/<string:username>")
+def about_user(username):
+
+    user = Users.query.filter_by(username = username).first()
+
+    post = Posts.query.join(Users, Users.id==Posts.user_id).add_columns(Users.id, Users.username, Users.email, Posts.content,Posts.title,Posts.slug,Posts.tagline,Posts.img_file,Posts.date).filter(Posts.user_id == user.id).all()
+
+    return render_template("about.html",params =params,user = user,posts=post)
+
+
+
 
 @app.route("/dashboard",methods = ['GET','POST'])
 def dashboard():
@@ -112,11 +131,14 @@ def dashboard():
     #     params['log']=1
 
     
-    if ('user' in session ):
+    if ('user' in session and session['user'] != None):
         params['log'] = 1
-        all_user = Users.query.filter_by(username = session['user'])
-        post = Posts.query.filter_by(user_id = all_user[0].id)
-        return render_template("dashboard.html",params = params,posts = post,user = all_user[0])
+        user = Users.query.filter_by(username = session['user']).first()
+        if(user == None):
+            return redirect('/logout')
+
+        post = Posts.query.filter_by(user_id = user.id)
+        return render_template("dashboard.html",params = params,posts = post,user = user)
 
     if request.method == 'POST':
         username = request.form.get('uname')
@@ -158,7 +180,7 @@ def edit(username,id):
             content = request.form.get('content')
             img_file = request.form.get('img_file')
             
-            if id == '0':
+            if int(id) == '-1':
                 user_id  = Users.query.filter_by(username = username).first().id
                 post = Posts(title = box_title,user_id = user_id ,slug = slug,date = datetime.now(),content= content,tagline= tline,img_file = img_file)
                 db.session.add(post)
@@ -166,7 +188,7 @@ def edit(username,id):
                 return redirect("/post/"+post.slug)
 
             else:
-                post = Posts.query.filter_by(id=id).first()
+                post = Posts.query.filter_by(id=int(id)).first()
                 if(box_title):
                     post.title = box_title
                 if(slug):
@@ -236,17 +258,23 @@ def uploader():
         if(request.method == 'POST'):
             f = request.files['file1']
             f.save(os.path.join(app.config['UPLOAD_FOLDER'],secure_filename(f.filename)))
-            return "Uploaded Successfully"
-        
-        
-                 
+            return "Uploaded Successfully"        
 
     print("going to contact page")
-    return render_template("contact.html",params =params)
+    return render_template("/dashboard",params =params)
 
-# @app.route("/<string:wrong_page>",methods = ['GET'])
-# def wrong_page(wrong_page):
-#     return render_template("index.html",params =params)
+@app.route("/dp", methods= ['GET','POST'])
+def dp_uploader():
+  
+    if(params['log']):
+        if(request.method == 'POST'):
+            f = request.files['file1']
+            f.save(os.path.join(app.config['UPLOAD_FOLDER'],secure_filename(str(session['user'])+".jpg")))
+            return redirect("/about/"+session['user'])       
+
+    print("going to contact page")
+    return render_template("/dashboard",params =params)
+
 
 @app.route("/forgot", methods= ['GET','POST'])
 def forgot_password():
@@ -280,7 +308,10 @@ def signup():
         if(user):
             return render_template("signup.html",params =params,cred = "User_name not available!")
 
-        new_user = Users(username = uname,email =email,pswd = otp)
+        about = request.form.get('about')
+        name = request.form.get('name')
+
+        new_user = Users(username = uname,about = about,Name=name,email =email,pswd = otp)
         db.session.add(new_user)
         db.session.commit()
 
@@ -290,7 +321,7 @@ def signup():
                 recipients = [email],
                 body = "Your new password is : "+ otp +". Contact Admin if you haven't initiated this"
                  )
-        return render_template("login.html",params =params,cred="Use credentials sent on mail.")         
+        return render_template("login.html",params =params,cred="User credentials sent on mail.")         
     
     return render_template("signup.html",params =params)
 

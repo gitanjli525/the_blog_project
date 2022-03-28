@@ -31,12 +31,12 @@
                         </h4>
                         <div class="post-preview">
                          
+                            {% set fname = 'assets/img/' + post.username+'.jpg' %}
                             <h5 class="alert-heading">
-                                <a href="#">
+                                <a href="/about/{{post.username}}">
                                     <div class="d-flex flex-row align-items-center">
                                         <img
-                                          src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(32).webp"
-                                          alt="avatar"
+                                          src="{{url_for('static',filename = fname )}}"
                                           width="25"
                                           height="25"
                                         />

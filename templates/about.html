@@ -1,12 +1,20 @@
 {% extends "layout.html" %}
 {% block body %}
         <!-- Page Header-->
-        <header class="masthead" style="background-image: url({{url_for('static',filename = 'assets/img/about-bg.jpg' )}})">
+        <header class="masthead" style="background-image: url({{ url_for('static',filename = 'assets/img/about-bg.jpg' ) }})">
             <div class="container position-relative px-4 px-lg-5">
                 <div class="row gx-4 gx-lg-5 justify-content-center">
                     <div class="col-md-10 col-lg-8 col-xl-7">
                         <div class="page-heading">
-                            <h1>About Me</h1>
+                            {% set fname = 'assets/img/' + user.username+'.jpg' %}
+                            <div class="d-flex flex-row align-items-center justify-content-center">
+                                        <img
+                                          src="{{url_for('static',filename = fname )}}"
+                                          width="125"
+                                          height="125"
+                                        />  
+                            </div>
+                            <h1>{{user.Name}}</h1>
                             <span class="subheading">This is what I do.</span>
                         </div>
                     </div>
@@ -14,18 +22,67 @@
             </div>
         </header>
         <!-- Main Content-->
+        
         <main class="mb-4">
             <div class="container px-4 px-lg-5">
                 <div class="row gx-4 gx-lg-5 justify-content-center">
                     <div class="col-md-10 col-lg-8 col-xl-7">
                         <p>
-                            {{params['about_text']}}
+                            {{user.about}}
                         </p>
+                        <hr>
+                        <h3>Posts by {{user.Name}}:</h3>
+                        <br>
+                        {% for post in posts %}
+                    <div class="alert alert-dark" role="alert">
+                        <h4 class="alert-heading">
+                            <a href="/post/{{post.slug}}">
+                                <h1 class="post-title">{{post.title}}</h2>
+                                <!-- <h3 class="post-subtitle">{{post.tagline}}</h3> -->
+                            </a>
+                        </h4>
+                        <div class="post-preview">
+                         
+                            {% set fname = 'assets/img/' + post.username+'.jpg' %}
+                            <h5 class="alert-heading">
+                                <a href="/about/{{post.username}}">
+                                    <div class="d-flex flex-row align-items-center">
+                                        <img
+                                          src="{{url_for('static',filename = fname )}}"
+                                          width="25"
+                                          height="25"
+                                        />
+                                        <div class="small mb-0 ms-2">
+                                            <b >{{post.username}}</b> 
+                                        </div>
+                                    </div>
+
+                                    
+                                </a>
+                            </h5>
+                            on {{post.date}}
+    
+                        </div>
+                        <hr>
+                        <a href="/post/{{post.slug}}">
+                            <h3 class="post-subtitle">{{post.tagline}}</h3>
+                        </a>
+                        <p>{{post.content[0:80]}}. . . . .</p>
+                        
+                         
+                        
+                    </div>
+
+
+                    
+                    {% endfor %}
 
                          
                 </div>
             </div>
         </main>
+
+        
 
         
         {% endblock %}

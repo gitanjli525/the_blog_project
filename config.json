@@ -17,6 +17,7 @@
         "login_image" :"login.svg",
         "admin" : "happy",
         "admin_password" :"mynameis149d",
-        "upload_location" :"F:\\MNIT\\CSE\\Lab\\SE\\flask_blogging_site\\static\\assets\\img"
+        "upload_location" :"F:\\MNIT\\CSE\\Lab\\5th sem\\SE\\flask_blogging_site\\static\\assets\\img"
+ 
     }
 }

@@ -21,14 +21,21 @@
                     <!-- Post preview-->
 <!-- <h1>Welcome you are logged in!</h1> -->
                   <h1>Add A new post</h1>
-                  <a class="btn btn-lg btn-primary text-uppercase" href="/edit/{{user.username}}/0">Create Post</a>
+                  <a class="btn btn-lg btn-primary text-uppercase" href="/edit/{{user.username}}/-1">Create Post</a>
                   <hr>
                   <h1>Upload A file</h1> 
                   <form action="/uploader" method="post" enctype="multipart/form-data">
                     <input type="file" name="file1">
                     <button class="btn btn-sm btn-primary text-uppercase" href="" type="submit">Submit</button>
 
-                  </form>  
+                  </form> 
+                  
+                  <h1>Update profile picture</h1> 
+                  <form action="/dp" method="post" enctype="multipart/form-data">
+                    <input type="file" name="file1">
+                    <button class="btn btn-sm btn-primary text-uppercase" href="" type="submit">Submit</button>
+
+                  </form> 
                   
       <hr>           
                   <br>
