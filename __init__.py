@@ -56,14 +56,9 @@ app.register_blueprint(auth,url_prefix="")
 app.register_blueprint(post,url_prefix="")
 app.register_blueprint(about,url_prefix="")
 
-# if(True):
-#     app.config['SQLALCHEMY_DATABASE_URI'] = params["local_uri"]
-# else:
-#     app.config['SQLALCHEMY_DATABASE_URI'] ='mysql+mysqlconnector://{user}:{password}@{server}/{database}'.format(user='example_user', password='password', server='67.205.144.13', database='tracebacks')
+if(True):
+    app.config['SQLALCHEMY_DATABASE_URI'] = params["local_uri"]
 
-# app.config['SQLALCHEMY_DATABASE_URI'] ='mysql://{user}:{password}@{server}/{database}'.format(user='example_user', password='password', server='67.205.144.13/phpmyadmin', database='tracebacks')
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://example_user:password@67.205.144.13/tracebacks' 
-app.config['SQLALCHEMY_DATABASE_URI'] ='mysql+mysqlconnector://{user}:{password}@{server}/{database}'.format(user='example_user', password='password', server='67.205.144.13', database='tracebacks')
 
 @app.route("/dp", methods= ['GET','POST'])
 def dp_uploader():
